@@ -132,14 +132,14 @@ parallelCVxgb <- function(inputData,
   # inputData$predsTrain = levels(inputData[, idx])[predict(object = xgbModel, newdata = dtrain) + 1]
   
   ##### train metrics
-  cat("train metrics \n")
+  cat("\n##### train metrics \n")
   confusionMatrixTrain <- confusionMatrix(data = inputData$predsTrain,
                                           reference = inputData$EventIds)
   print(confusionMatrixTrain)
   
   
   if(!is.null(testDataSplit)){
-    cat("test metrics \n")
+    cat("\n##### test metrics \n")
     confusionMatrixTest <- confusionMatrix(data = testDataSplit$predsTest,
                         reference = testDataSplit$EventIds)
     print(confusionMatrixTest)

@@ -4,7 +4,8 @@
 # 2. test data
 # 3. a list of the folds for cv
 seals_data_prep_for_ml <- function(featureData,
-                                   classMax,
+                                   classMaxTrain = 500,
+                                   classMaxTest = 500,
                                    printSummary = TRUE,
                                    codeTest = TRUE,
                                    test_animal_names = c("abbey", "bella")) # NULL for no test data
@@ -48,9 +49,8 @@ seals_data_prep_for_ml <- function(featureData,
   set.seed(123, "L'Ecuyer")
   
   if(codeTest){
-    classMax <- 20
-  }else{
-    classMax <- classMax
+    classMaxTrain = 20
+    classMaxTest = 20
   }
   
   train_animal_names <- unique(trainDataSplit$SealName)
@@ -58,7 +58,7 @@ seals_data_prep_for_ml <- function(featureData,
   ##### sample the data by animal
   trainDataSplit <- lapply(train_animal_names, sample_by_animal_worker,
                            trainDataSplit,
-                           classMax,
+                           classMaxTrain,
                            uEventIds,
                            printSummary)
   
@@ -72,9 +72,9 @@ seals_data_prep_for_ml <- function(featureData,
   ##### sample the test data
   testDataSplit <- lapply(test_animal_names, sample_by_animal_worker,
                           testDataSplitFull,
-                           classMax,
-                           uEventIds,
-                           printSummary)
+                          classMaxTest,
+                          uEventIds,
+                          printSummary)
   
   testDataSplit <- do.call(what = rbind, args = testDataSplit)
   
@@ -87,13 +87,22 @@ seals_data_prep_for_ml <- function(featureData,
   
   ##### remove the indetifier variables
   trainDataSplit <- trainDataSplit[, !(names(trainDataSplit) %in% c("FileDate", "SealName", "nRows", 
-                                                              "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]
+                                                                    "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]
   
   testDataSplit <- testDataSplit[,!(names(testDataSplit) %in%  c("FileDate", "SealName", "nRows", 
                                                                  "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]
   
   testDataSplitFull <- testDataSplitFull[,!(names(testDataSplit) %in%  c("FileDate", "SealName", "nRows", 
-                                                                 "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]
+                                                                         "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]
+  
+  
+  if(printSummary){
+    cat("\n##### final test data summary:")
+    print(table(trainDataSplit$EventIds))
+    
+    cat("\n##### final test data summary:")
+    print(table(testDataSplit$EventIds))
+  }
   
   return(list(trainDataSplit = trainDataSplit,
               testDataSplit = testDataSplit,
@@ -117,7 +126,15 @@ sample_by_animal_worker <- function(animal_name,
     tempData <- inputData[inputData$EventIds == uEventIds[i],]
     nr <- nrow(tempData)
     
-    if(nr>classMax){
+    if(is.data.frame(classMax)){
+      if(nr > classMax$classMax[classMax$behaviour == uEventIds[i]]){
+        sampleIdx <- sample.int(n = nr,
+                                size = classMax$classMax[classMax$behaviour == uEventIds[i]])
+        tempData <- tempData[sampleIdx,]
+      }
+      
+    }
+    else if(nr>classMax){
       sampleIdx <- sample.int(n = nr, size = classMax)
       tempData <- tempData[sampleIdx,]
     }
