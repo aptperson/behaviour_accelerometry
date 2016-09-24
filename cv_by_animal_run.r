@@ -23,7 +23,7 @@ load("processed_data/featData4_13.RData")
 table(featData4_13$EventIds)
 
 ##### defin class maxes for down sampling
-# these class maxes should give roughly ballanced overall class sizes
+# these class maxs should give roughly ballanced overall class sizes
 calss_max_table_train = data.frame(behaviours = c("Foraging", "Grooming", "Resting", "Travelling"),
                              classMax = c(550, Inf, 550, 450))
 calss_max_table_test = data.frame(behaviours = c("Foraging", "Grooming", "Resting", "Travelling"),

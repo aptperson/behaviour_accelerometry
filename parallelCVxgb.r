@@ -1,12 +1,12 @@
 parallelCVxgb <- function(inputData,
                           k = 5,
                           paramList = NULL,
-                          # Model = "xgb",
                           trainTargets = "EventIds",
                           testDataSplit = NULL,
                           plotCvScore = TRUE,
                           preds = FALSE,
-                          folds_list = NULL
+                          folds_list = NULL,
+                          nthreads = 1
                           ){
   
   library("xgboost")
@@ -41,6 +41,7 @@ parallelCVxgb <- function(inputData,
                                      num_class = numClass,
                                      min_child_weight = paramList$min_child_weight[i],
                                      gamma = paramList$gamma[i]),
+                       nthread = nthreads,
                        nfolds = k,
                        data = dtrain,
                        nrounds = paramList$nrounds[i],
@@ -53,10 +54,11 @@ parallelCVxgb <- function(inputData,
                        stratified = TRUE,
                        verbose = TRUE,
                        maximize = FALSE)
-    
+    # browser()
     ##### find the best paramters
     paramList$acc[i] = 1-min(xgbModel$test.merror.mean)
     paramList$boostingItt[i] = which.min(xgbModel$test.merror.mean)
+    paramList$std[i] <- xgbModel$test.merror.std[paramList$boostingItt[i]]
     
     if(plotCvScore){
       library(ggplot2)

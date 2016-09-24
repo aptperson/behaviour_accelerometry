@@ -6,7 +6,7 @@ ml_run <- function(trainData,
                    Parallel = TRUE,
                    K = 10,
                    SAVE = TRUE,
-                   Cores = 4,
+                   Cores = 1,
                    Kernel = "linear",
                    printSummary = TRUE){
   
@@ -23,7 +23,7 @@ ml_run <- function(trainData,
            if(codeTest){
              paramList = expand.grid(eta = 10 ^ - seq(from = 1, to = 1, by = 1),
                                      max.depth = 1:2,
-                                     nrounds = 10,
+                                     nrounds = 2,
                                      subsample = c(0.5),
                                      colsample_bytree = 0.5,
                                      # lambda = seq(from = 0.5, to = 1, by = 0.5),
@@ -35,10 +35,10 @@ ml_run <- function(trainData,
              
              # paramList <- NULL
              paramList = expand.grid(eta = 10 ^ - seq(from = 2, to = 4, by = 1),
-                                     max.depth = 1:5,
+                                     max.depth = 2:5,
                                      nrounds = 5000,
-                                     subsample = c(0.7, 0.8, 0.9),
-                                     colsample_bytree = c(0.7, 0.8, 0.9),
+                                     subsample = c(0.7, 0.8),
+                                     colsample_bytree = c(0.7, 0.8),
                                      # lambda = seq(from = 0, to = 1, by = 0.2),
                                      # alpha = seq(from = 0, to = 1, by = 0.2), 
                                      max_delta_step = 0) #don't think this param is doing anything leave at default
@@ -48,7 +48,8 @@ ml_run <- function(trainData,
                                        k = K,
                                        trainTargets = "EventIds",
                                        paramList = paramList,
-                                       testDataSplit = testData)
+                                       testDataSplit = testData,
+                                       nthreads = Cores)
 
          },
          "RF" = {
