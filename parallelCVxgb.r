@@ -46,8 +46,8 @@ parallelCVxgb <- function(inputData,
                        nrounds = paramList$nrounds[i],
                        folds = folds_list,
                        eval_metric = "merror",
-                       # early.stop.round = 250,
-                       # print.every.n = 250,
+                       early.stop.round = 250,
+                       print.every.n = 250,
                        prediction = FALSE,
                        showsd = TRUE,
                        stratified = TRUE,
@@ -144,13 +144,15 @@ parallelCVxgb <- function(inputData,
                         reference = testDataSplit$EventIds)
     print(confusionMatrixTest)
     print(diag(confusionMatrixTest$table)/colSums(confusionMatrixTest$table))
+    cat("Sensitivity == Recall, PPV == Precision\n")
     
     return(list(xgbModel = xgbModel,
                 bestParams = bestParams,
                 paramList = paramList,
                 trainData = inputData,
                 testDataSplit = testDataSplit,
-                confusionMatrixTrain = confusionMatrixTrain))
+                confusionMatrixTrain = confusionMatrixTrain, 
+                confusionMatrixTest = confusionMatrixTest))
   }else{
     return(list(xgbModel = xgbModel,
                 bestParams = bestParams,

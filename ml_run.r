@@ -9,7 +9,7 @@ ml_run <- function(trainData,
                    Cores = 4,
                    Kernel = "linear",
                    printSummary = TRUE){
-
+  
   library(caret)
   
   ##### creaete a function to evaluate the final fittness
@@ -21,12 +21,11 @@ ml_run <- function(trainData,
          "XGB" = {
            #source("parallelCVxgb.r")
            if(codeTest){
-             K = K
              paramList = expand.grid(eta = 10 ^ - seq(from = 1, to = 1, by = 1),
-                                     max.depth = 5,
-                                     nrounds = 100,
+                                     max.depth = 1:2,
+                                     nrounds = 10,
                                      subsample = c(0.5),
-                                     colsample_bytree = 1,
+                                     colsample_bytree = 0.5,
                                      # lambda = seq(from = 0.5, to = 1, by = 0.5),
                                      # alpha = seq(from = 0.5, to = 1, by = 0.5), 
                                      max_delta_step = 0) #don't think this param is doing anything leave at default
@@ -49,12 +48,8 @@ ml_run <- function(trainData,
                                        k = K,
                                        trainTargets = "EventIds",
                                        paramList = paramList,
-                                       # Model= "XGB",
                                        testDataSplit = testData)
-           # browser()
-           finalPreds <- outputData$testDataSplit$predsTest
-           finalModel <- outputData$trainData$predsTrain
-           fittnessCV <- outputData
+
          },
          "RF" = {
            source("r/models/parallelCV6.R")
@@ -99,35 +94,25 @@ ml_run <- function(trainData,
            
          })
   
+  ##### calculate the f-score
+  fScore <- 2 * outputData$confusionMatrixTest$byClass[, "Sensitivity"] *
+    outputData$confusionMatrixTest$byClass[, "Pos Pred Value"] /
+    (outputData$confusionMatrixTest$byClass[, "Sensitivity"] +
+       outputData$confusionMatrixTest$byClass[, "Pos Pred Value"])
   
   ######print out the results#####
-  
-  propTable <- table(finalPreds)
   if(printSummary){
-    print(propTable)
-    cat("Sensitivity == Recall, PPV == Precision\n")
+    
+    cat("####f Score:\n")
+    print(data.frame(fScore))
+    test_accuary <- sum(testData$EventIds == outputData$testDataSplit$predsTest)/length(outputData$testDataSplit$predsTest)
+    cat("Out of sample accuracy:", round(test_accuary * 1000) / 1000, "\n")
   }
-  #fScore<- 2 * confusionMat$byClass[, "Sensitivity"] * confusionMat$byClass[, "Pos Pred Value"] /
-  # (confusionMat$byClass[, "Sensitivity"] + confusionMat$byClass[, "Pos Pred Value"])
-  #if(printSummary){
-  
-  # cat("####f Score:\n")
-  #  print(data.frame(fScore))
-  #   cat("Out of sample accuracy:",
-  #       sum(testDataSplit$EventIds == finalPreds)/length(finalPreds), "\n")
-  #}
   # browser()
-  outputData <- list(finalModel = finalModel,
-                     #confusionMat = confusionMat,
-                     #fittnessCV = fittnessCV$meanfittnessCV,
-                     finalPreds = finalPreds,
-                     trainDataSplit = fittnessCV$trainData,
-                     testDataSplit = fittnessCV$testDataSplit,
-                     # trainTestIdx = trainTestIdx,
-                     bestParams = fittnessCV$bestParams,
-                     #fScore = fScore,
-                     # Dummies = Dummies,
-                     Model = Model)
-
+  outputData$fScore <- fScore
+  outputData$Model <- Model
+  outputData$test_accuary <- test_accuary
+  
+  
   return(outputData)  
 }
