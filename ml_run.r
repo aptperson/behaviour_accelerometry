@@ -25,23 +25,23 @@ ml_run <- function(trainData,
                                      max.depth = 2:3,
                                      nrounds = 200,
                                      subsample = 0.8,
-                                     colsample_bytree = 0.8,
+                                     colsample_bytree = 0.8)#,
                                      # lambda = seq(from = 0.5, to = 1, by = 0.5),
                                      # alpha = seq(from = 0.5, to = 1, by = 0.5), 
-                                     max_delta_step = 0) #don't think this param is doing anything leave at default
+                                     # max_delta_step = 0) #don't think this param is doing anything leave at default
              
            }
            else{
              
              # paramList <- NULL
-             paramList = expand.grid(eta = 10 ^ - seq(from = 2, to = 4, by = 1),
+             paramList = expand.grid(eta = c(-.5, 10 ^ - seq(from = 1, to = 3, by = 1)),
                                      max.depth = 2:5,
                                      nrounds = 5000,
                                      subsample = c(0.7, 0.8),
-                                     colsample_bytree = c(0.7, 0.8),
+                                     colsample_bytree = c(0.7, 0.8))#,
                                      # lambda = seq(from = 0, to = 1, by = 0.2),
                                      # alpha = seq(from = 0, to = 1, by = 0.2), 
-                                     max_delta_step = 0) #don't think this param is doing anything leave at default
+                                     # max_delta_step = 0) #don't think this param is doing anything leave at default
            }
            outputData <- parallelCVxgb(inputData = trainData,
                                        folds_list = folds_list,

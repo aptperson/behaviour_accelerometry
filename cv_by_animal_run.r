@@ -19,10 +19,17 @@ load("processed_data/outputData_13.RData")
 # head(featData7_13)
 # unique(featData7_13$SealName)
 # [1] abbey   bella   groucho malie   mav     maxine  miri    nelson  rocky   ronnie  sly     teiko 
+# SL: abbey, miri, maxine, rocky, malie, teiko
+# FS: bella, groucho, mav, ronnie, sly, nelson
+
+print(table(outputData$EventIds, outputData$SealName))
+print(table(outputData$EventIds, outputData$Place))
+
+##### remove land Foraging
 
 # names(outputData)
 # 
-# outputData$Place <- as.numeric(as.factor(outputData$Place))
+outputData$Place <- as.numeric(as.factor(outputData$Place))
 # table(outputData$Place)
 # 
 # feat_data_less_feat <- outputData[, !grepl(pattern = "[0-9]", x = names(outputData))]
@@ -52,13 +59,18 @@ save(processed_feat_data, file = "processed_data/processed_feat_data.RData")
 load(file = "processed_data/processed_feat_data.RData")
 
 ##### look at the classes by fold
-dim(processed_feat_data$trainDataSplit)
-tmp <- lapply(1:10, function(i){
-  cat("\n# train:")
-  print(table(processed_feat_data$trainDataSplit[-processed_feat_data$folds_list[[i]], "EventIds"]))
-  cat("\n# test:")
-  print(table(processed_feat_data$trainDataSplit[processed_feat_data$folds_list[[i]], "EventIds"]))
+trainEventIds <- as.factor(processed_feat_data$trainDataSplit[, "EventIds"])
+testEventIds <- as.factor(processed_feat_data$testDataSplit[, "EventIds"])
+
+trainFoldTable <- lapply(1:10, function(i){
+table(trainEventIds[-processed_feat_data$folds_list[[i]]])
 })
+testFoldTable <- lapply(1:10, function(i){
+  table(testEventIds[-processed_feat_data$folds_list[[i]]])
+})
+print(do.call(rbind, trainFoldTable))
+print(do.call(rbind, testFoldTable))
+
 
 ##### run the ml model
 xgb_test_run <- ml_run(trainData = processed_feat_data$trainDataSplit,
