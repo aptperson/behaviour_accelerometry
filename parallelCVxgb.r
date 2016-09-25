@@ -22,7 +22,7 @@ parallelCVxgb <- function(inputData,
   #   inputData$harsness <- as.numeric(inputData$harsness)
   dtrain <- xgb.DMatrix(data = data.matrix(inputData[, !idx]),
                         label = as.numeric(factor(inputData[, idx])) - 1)
-  set.seed(1234)
+  set.seed(12345)
   
   ##### append paramList for summary stats storage
   paramList$acc <- 0
@@ -30,17 +30,19 @@ parallelCVxgb <- function(inputData,
   
   ##### loop over param list
   for(i in 1:nrow(paramList)){
+    # browser()
     xgbModel <- xgb.cv(params = list(objective = "multi:softprob",
                                      eta = paramList$eta[i],
                                      max.depth = paramList$max.depth[i],
                                      subsample = paramList$subsample[i],
                                      colsample_bytree = paramList$colsample_bytree[i],
-                                     lambda = paramList$lambda[i],
-                                     alpha = paramList$alpha[i],
-                                     max_delta_step = paramList$max_delta_step[i],
-                                     num_class = numClass,
-                                     min_child_weight = paramList$min_child_weight[i],
-                                     gamma = paramList$gamma[i]),
+                                     # lambda = paramList$lambda[i],
+                                     # alpha = paramList$alpha[i],
+                                     # max_delta_step = paramList$max_delta_step[i],
+                                     num_class = numClass#,
+                                     # min_child_weight = paramList$min_child_weight[i],
+                                     # gamma = paramList$gamma[i]
+                                     ),
                        nthread = nthreads,
                        nfold = k,
                        data = dtrain,
@@ -89,18 +91,19 @@ parallelCVxgb <- function(inputData,
     dtest <- xgb.DMatrix(data = data.matrix(testDataSplit[, !idx]),
                          label = as.numeric(testDataSplit[, idx]) - 1)
   }
-  set.seed(12345)
+  set.seed(123456)
+  # browser()
   xgbModel <- xgb.train(params = list(objective = "multi:softprob",
                                       eta = bestParams$eta,
                                       max.depth = bestParams$max.depth,
-                                      nthread = bestParams$nthread,
                                       subsample = bestParams$subsample,
                                       colsample_bytree = bestParams$colsample_bytree,
-                                      lambda = bestParams$lambda,
-                                      alpha = bestParams$alpha,
-                                      max_delta_step = bestParams$max_delta_step,
+                                      # lambda = bestParams$lambda,
+                                      # alpha = bestParams$alpha,
+                                      # max_delta_step = bestParams$max_delta_step,
                                       num_class = numClass,
                                       eval_metric = "merror"),
+                        nthread = nthreads,
                         data = dtrain,
                         nrounds = bestParams$boostingItt,
                         prediction = TRUE,
@@ -108,6 +111,19 @@ parallelCVxgb <- function(inputData,
                         maximize = FALSE,
                         print.every.n = 50,
                         watchlist = list(train = dtrain, validation = dtest))
+  
+  ##### params passed to xgb.cv
+#   eta = paramList$eta[i], Y
+#   max.depth = paramList$max.depth[i], Y
+#   subsample = paramList$subsample[i], Y
+#   colsample_bytree = paramList$colsample_bytree[i], Y
+#   lambda = paramList$lambda[i], Y
+#   alpha = paramList$alpha[i], Y
+#   max_delta_step = paramList$max_delta_step[i], Y
+#   num_class = numClass, Y
+#   min_child_weight = paramList$min_child_weight[i], 
+#   gamma = paramList$gamma[i]
+  
   
   ##### repredict at the best parameters
   ##### return the predictions at the best parameters

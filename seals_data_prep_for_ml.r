@@ -85,6 +85,8 @@ seals_data_prep_for_ml <- function(featureData,
     print(table(testDataSplit$EventIds, testDataSplit$SealName))
   }
   
+  # browser()
+  
   ##### remove the indetifier variables
   trainDataSplit <- trainDataSplit[, !(names(trainDataSplit) %in% c("FileDate", "SealName", "nRows", 
                                                                     "Acf.x", "Acf.y", "Acf.z", "Corr.xy", "Corr.yz", "Corr.xz"))]

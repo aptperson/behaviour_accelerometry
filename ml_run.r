@@ -22,10 +22,10 @@ ml_run <- function(trainData,
            #source("parallelCVxgb.r")
            if(codeTest){
              paramList = expand.grid(eta = 10 ^ - seq(from = 1, to = 1, by = 1),
-                                     max.depth = 1:2,
-                                     nrounds = 2,
-                                     subsample = c(0.5),
-                                     colsample_bytree = 0.5,
+                                     max.depth = 2:3,
+                                     nrounds = 200,
+                                     subsample = 0.8,
+                                     colsample_bytree = 0.8,
                                      # lambda = seq(from = 0.5, to = 1, by = 0.5),
                                      # alpha = seq(from = 0.5, to = 1, by = 0.5), 
                                      max_delta_step = 0) #don't think this param is doing anything leave at default
